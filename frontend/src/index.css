@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== APPLY BASE ===== */
+@layer base {
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+.input {
+  @apply w-full px-4 py-3 rounded-full bg-[#F5EDD8] outline-none;
+}
