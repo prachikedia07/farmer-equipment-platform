@@ -2,8 +2,30 @@ import { Link } from "react-router-dom";
 import { Tractor, Users, Wrench, ShieldCheck, Sprout, CalendarCheck, IndianRupee, Star } from "lucide-react";
 import { WheatDivider, FarmSceneBanner } from "../../components/FarmDecoration";
 import { equipmentIcons } from "../../components/EquipmentIcon";
+import { useAuth } from "../../context/AuthContext";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
+
+  const { user } = useAuth();
+const navigate = useNavigate();
+
+const handleListEquipment = () => {
+  if (!user) {
+    toast("Please login as equipment owner");
+    navigate("/login");
+    return;
+  }
+
+  if (user.role !== "owner") {
+    toast.error("Only equipment owners can list equipment");
+    return;
+  }
+
+  navigate("/owner/dashboard");
+};
+
   const features = [
     {
       icon: Tractor,
@@ -71,12 +93,9 @@ export default function Home() {
                   <Tractor className="w-4 h-4" />
                   Find Equipment
                 </Link>
-                <Link
-                  to="/signup"
-                  className="inline-flex items-center justify-center gap-2 border-2 border-[#4A2E15] text-[#4A2E15] hover:bg-[#4A2E15]/5 px-6 py-3 rounded-xl font-semibold text-sm transition-all"
-                >
-                  List Your Equipment
-                </Link>
+               <button onClick={handleListEquipment} className="inline-flex items-center justify-center gap-2 border-2 border-[#4A2E15] text-[#4A2E15] hover:bg-[#4A2E15]/5 px-6 py-3 rounded-xl font-semibold text-sm transition-all">
+  List Your Equipment
+</button>
               </div>
             </div>
             <div className="relative">

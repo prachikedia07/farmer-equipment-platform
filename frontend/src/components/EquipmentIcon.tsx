@@ -1,5 +1,6 @@
 // Custom farm equipment icons — hand-drawn SVG style matching Figma
 import type { SVGProps } from "react";
+import type { JSX } from "react";
 
 export function TractorIcon(props: SVGProps<SVGSVGElement>) {
   return (

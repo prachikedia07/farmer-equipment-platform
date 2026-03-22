@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Tractor, Eye, EyeOff } from "lucide-react";
+import toast from "react-hot-toast";
 
 const API = "http://localhost:5000/api";
 
@@ -43,8 +44,9 @@ export default function Signup() {
 
     if (res.ok) {
       navigate("/login");
+      toast.success("Account created!");
     } else {
-      setError(data.message || "Signup failed. Please try again.");
+      toast.error(data.message || "Signup failed. Please try again.");
     }
   };
 

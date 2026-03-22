@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { Tractor, Eye, EyeOff } from "lucide-react";
+import toast from "react-hot-toast";
 
 const API = "http://localhost:5000/api";
 
@@ -23,6 +24,7 @@ export default function Login() {
   const [loading, setLoading]         = useState(false);
   const [error, setError]             = useState("");
 
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setError("");
@@ -30,28 +32,34 @@ export default function Login() {
 
   // ── BACKEND UNTOUCHED ──
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+  e.preventDefault();
+  setLoading(true);
+  setError("");
 
-    const res = await fetch(`${API}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, role }),
-    });
+  const res = await fetch(`${API}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(form),
+  });
 
-    const data = await res.json();
-    setLoading(false);
+  const data = await res.json();
+  setLoading(false);
 
-    if (res.ok) {
-      login(data.user);
-      if (data.user.role === "farmer")      navigate("/farmer/dashboard");
-      else if (data.user.role === "owner")  navigate("/owner/dashboard");
-      else                                  navigate("/admin/dashboard");
+  if (res.ok) {
+    login(data);
+
+    if (data.user.role === "farmer") {
+      navigate("/farmer/dashboard");
+    } else if (data.user.role === "owner") {
+      navigate("/owner/dashboard");
     } else {
-      setError(data.message || "Login failed. Please try again.");
+      navigate("/admin/dashboard");
     }
-  };
+    toast.success("Login successful!");
+  } else {
+    toast.error(data.message || "Login failed");
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FDF6E3] px-4 py-12">

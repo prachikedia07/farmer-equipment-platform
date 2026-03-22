@@ -3,8 +3,13 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { MapPin, Star, Phone, IndianRupee, Clock, CheckCircle } from "lucide-react";
+import BookingModal from "../../components/BookingModal";
+import { useAuth } from "../../context/AuthContext";
+import toast from "react-hot-toast";
 
 const API = "http://localhost:5000/api";
+
+
 
 function formatDate(dateStr: string) {
   if (!dateStr) return "";
@@ -19,6 +24,8 @@ export default function EquipmentDetails() {
 
   const [data, setData]       = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
+  const { user } = useAuth();
+const [open, setOpen] = useState(false);
 
   // ── BACKEND FETCHES UNTOUCHED ──
   useEffect(() => {
@@ -215,11 +222,30 @@ export default function EquipmentDetails() {
               </p>
 
               <button
-                onClick={() => navigate("/login")}
-                className="w-full bg-[#4A2E15] hover:bg-[#3A2010] text-white font-bold text-sm py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all"
-              >
-                Request Booking
-              </button>
+  onClick={() => {
+    if (!user) {
+      toast.error("Please login to book equipment");
+      navigate("/login");
+      return;
+    }
+
+    if (user.role !== "farmer") {
+      toast.error("Only farmers can book equipment");
+      return;
+    }
+
+    setOpen(true);
+  }}
+  className="w-full bg-[#4A2E15] hover:bg-[#3A2010] text-white font-bold text-sm py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all"
+>
+  Request Booking
+</button>
+
+<BookingModal
+  isOpen={open}
+  onClose={() => setOpen(false)}
+  equipmentId={data._id}
+/>
 
               <div className="mt-4 pt-4 border-t border-[#F0E8D8] flex items-center gap-2 text-xs text-[#5C3D1E]/50">
                 <Clock className="w-3.5 h-3.5" />

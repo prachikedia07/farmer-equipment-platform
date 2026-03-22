@@ -64,7 +64,7 @@ export const getMyBookings = async (req: any, res: Response) => {
   try {
     const bookings = await Booking.find({ farmer: req.user._id })
       .populate("equipment")
-      .populate("owner", "name");
+      .populate("owner", "name phone");
 
     res.json(bookings);
   } catch (error) {
@@ -145,5 +145,36 @@ export const markBookingCompleted = async (req: any, res: Response) => {
 
   } catch (error) {
     res.status(500).json({ message: "Error completing booking" });
+  }
+};
+
+export const cancelBookingByFarmer = async (req: any, res: Response) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    // ✅ only farmer who created booking
+    if (booking.farmer.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not allowed" });
+    }
+
+    // ❌ cannot cancel completed
+    if (booking.status === "completed") {
+      return res.status(400).json({
+        message: "Completed booking cannot be cancelled"
+      });
+    }
+
+    booking.status = "cancelled";
+
+    await booking.save();
+
+    res.json({ message: "Booking cancelled", booking });
+
+  } catch (error) {
+    res.status(500).json({ message: "Error cancelling booking" });
   }
 };

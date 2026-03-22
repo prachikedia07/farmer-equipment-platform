@@ -4,7 +4,8 @@ export type BookingStatus =
   | "pending"
   | "accepted"
   | "rejected"
-  | "completed";
+  | "completed"
+  | "cancelled";
 
 interface IBooking extends mongoose.Document {
   farmer: mongoose.Types.ObjectId;
@@ -58,7 +59,7 @@ const bookingSchema = new mongoose.Schema<IBooking>(
 
     status: {
       type: String,
-      enum: ["pending", "accepted", "rejected", "completed"],
+      enum: ["pending", "accepted", "rejected", "completed", "cancelled"],
       default: "pending"
     }
   },
