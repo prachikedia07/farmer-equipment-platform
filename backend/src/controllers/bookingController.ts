@@ -78,7 +78,7 @@ export const getOwnerBookings = async (req: any, res: Response) => {
       owner: req.user._id
     })
       .populate("equipment")
-      .populate("farmer", "name");
+      .populate("farmer", "name phone");
 
     res.json(bookings);
 
@@ -169,6 +169,7 @@ export const cancelBookingByFarmer = async (req: any, res: Response) => {
     }
 
     booking.status = "cancelled";
+booking.cancelReason = req.body.reason || "";
 
     await booking.save();
 

@@ -11,6 +11,9 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import BookingDetails from "./pages/farmer/BookingDetails";
+import OwnerBookingDetails from "./pages/owner/OwnerBookingDetails";
+import OwnerProfile from "./pages/owner/Profile";
+import FarmerProfile from "./pages/farmer/Profile";
 
 function App() {
   return (
@@ -21,6 +24,9 @@ function App() {
           <Route path="/equipment" element={<Equipment />} />
           <Route path="/equipment/:id" element={<EquipmentDetails />} />
           <Route path="/booking/:id" element={<BookingDetails />} />
+          <Route path="/owner/booking/:id" element={<OwnerBookingDetails />} />
+          <Route path="/farmer/profile" element={<FarmerProfile />} />
+          <Route path="/owner/profile" element={<OwnerProfile />} />
           <Route
   path="/login"
   element={
@@ -58,7 +64,7 @@ function App() {
 <Route
   path="/admin/dashboard"
   element={
-    <ProtectedRoute>
+    <ProtectedRoute role="admin">
       <AdminDashboard />
     </ProtectedRoute>
   }

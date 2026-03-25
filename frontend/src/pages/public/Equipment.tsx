@@ -49,11 +49,11 @@ export default function Equipment() {
   });
 
   return (
-    <div className="min-h-screen bg-[#FDF6E3] px-4 sm:px-6 py-10">
+    <div className="min-h-screen bg-[#FDF6E3] px-4 sm:px-6 py-6">
       <div className="max-w-7xl mx-auto">
 
         {/* ── HEADER ── */}
-        <div className="mb-8">
+        <div className="mb-6">
           <h1 className="text-3xl sm:text-4xl font-bold text-[#2C1A0E] mb-1.5">
             Nearby Equipment
           </h1>
@@ -63,7 +63,7 @@ export default function Equipment() {
         </div>
 
         {/* ── FILTER BAR — shadcn components matching Figma ── */}
-        <div className="bg-white rounded-2xl shadow-sm border border-[#EDE3D0] p-4 md:p-6 mb-6">
+        <div className="bg-white rounded-3xl shadow-sm border border-[#EDE3D0] p-4 md:p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 
             {/* Search — spans 2 cols on md */}

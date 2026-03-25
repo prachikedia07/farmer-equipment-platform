@@ -74,6 +74,18 @@ export const getEquipmentById = async (req: Request, res: Response) => {
   }
 };
 
+export const getMyEquipment = async (req: any, res: Response) => {
+  try {
+    const equipment = await Equipment.find({
+      owner: req.user._id
+    });
+
+    res.json(equipment);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching owner equipment" });
+  }
+};
+
 // 4. Update equipment (Owner only)
 export const updateEquipment = async (req: any, res: Response) => {
   try {
@@ -89,15 +101,17 @@ export const updateEquipment = async (req: any, res: Response) => {
     }
 
     // allowed fields
-    const allowedUpdates = [
-      "name",
-      "category",
-      "price",
-      "pricingType",
-      "location",
-      "availability",
-      "image"
-    ];
+   const allowedUpdates = [
+  "name",
+  "category",
+  "price",
+  "pricingType",
+  "location",
+  "availability",
+  "image",
+  "description",
+  "features"
+];
 
     const updates = Object.keys(req.body);
 
@@ -149,3 +163,4 @@ export const deleteEquipment = async (req: any, res: Response) => {
     res.status(500).json({ message: "Error deleting equipment" });
   }
 };
+

@@ -20,7 +20,7 @@ export const registerUser = async (req: Request, res: Response) => {
       phone,
       email,
       password: hashedPassword,
-      role
+      role: role === "owner" ? "owner" : "farmer"
     });
 
     res.status(201).json({
@@ -75,5 +75,36 @@ export const getMe = async (req: any, res: Response) => {
     res.status(200).json(req.user);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+// GET PROFILE
+export const getProfile = async (req: any, res: Response) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+
+    res.json(user);
+  } catch {
+    res.status(500).json({ message: "Error fetching profile" });
+  }
+};
+
+// UPDATE PROFILE
+export const updateProfile = async (req: any, res: Response) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.name = req.body.name || user.name;
+    user.phone = req.body.phone || user.phone;
+    user.email = req.body.email || user.email;
+
+    await user.save();
+
+    res.json(user);
+  } catch {
+    res.status(500).json({ message: "Error updating profile" });
   }
 };

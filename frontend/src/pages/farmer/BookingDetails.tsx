@@ -12,24 +12,24 @@ import { useAuth } from "../../context/AuthContext";
 const API = "http://localhost:5000/api";
 
 const STATUS_STYLES: Record<string, string> = {
-  pending:   "bg-yellow-100 text-yellow-800 border border-yellow-300",
-  accepted:  "bg-green-100  text-green-800  border border-green-300",
+  pending: "bg-yellow-100 text-yellow-800 border border-yellow-300",
+  accepted: "bg-green-100  text-green-800  border border-green-300",
   confirmed: "bg-green-100  text-green-800  border border-green-300",
   completed: "bg-blue-100   text-blue-800   border border-blue-300",
-  rejected:  "bg-red-100    text-red-800    border border-red-300",
+  rejected: "bg-red-100    text-red-800    border border-red-300",
   cancelled: "bg-red-100    text-red-800    border border-red-300",
 };
 const STATUS_LABEL: Record<string, string> = {
-  pending:   "Pending",
-  accepted:  "Confirmed",
+  pending: "Pending",
+  accepted: "Confirmed",
   confirmed: "Confirmed",
   completed: "Completed",
-  rejected:  "Cancelled",
+  rejected: "Cancelled",
   cancelled: "Cancelled",
 };
 const PAYMENT_STYLES: Record<string, string> = {
-  pending:  "bg-yellow-50 text-yellow-800 border border-yellow-300",
-  paid:     "bg-green-50  text-green-800  border border-green-300",
+  pending: "bg-yellow-50 text-yellow-800 border border-yellow-300",
+  paid: "bg-green-50  text-green-800  border border-green-300",
   refunded: "bg-blue-50   text-blue-800   border border-blue-300",
 };
 
@@ -39,20 +39,90 @@ function formatTime(t: string): string {
   const h = parseInt(hStr, 10);
   if (isNaN(h)) return t;
   const ampm = h >= 12 ? "PM" : "AM";
-  const h12  = h % 12 === 0 ? 12 : h % 12;
-  return `${String(h12).padStart(2,"0")}:${mStr || "00"} ${ampm}`;
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${String(h12).padStart(2, "0")}:${mStr || "00"} ${ampm}`;
 }
 
 export default function BookingDetails() {
-  const { id }   = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [data, setData]             = useState<any>(null);
-  const [loading, setLoading]       = useState(true);
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [reviewed, setReviewed] = useState(false);
+  const [review, setReview] = useState<any>(null);
+
+  useEffect(() => {
+    if (!data?.equipment?._id) return;
+
+    fetch(`${API}/reviews/${data.equipment._id}`)
+      .then(res => res.json())
+      .then(all => {
+        const r = all.find(
+          (rev: any) => String(rev.booking) === String(data._id)
+        );
+
+        setReview(r || null);
+      })
+      .catch(() => { });
+  }, [data]);
+
+
+  const submitReview = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${API}/reviews`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          bookingId: data._id,
+          rating,
+          comment
+        })
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) throw new Error(result.message);
+
+      setReview(result); // 🔥 IMPORTANT
+      toast.success("Review submitted ⭐");
+
+    } catch (err: any) {
+      toast.error(err.message || "Error submitting review");
+    }
+  };
+
+  const deleteReview = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${API}/reviews/${review._id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) throw new Error();
+
+      setReview(null);
+      toast.success("Review deleted");
+
+    } catch {
+      toast.error("Failed to delete review");
+    }
+  };
 
   // ── BACKEND FETCH UNTOUCHED ──
   useEffect(() => {
@@ -81,52 +151,52 @@ export default function BookingDetails() {
 
   // ── CANCEL UNTOUCHED ──
   const cancelBooking = async () => {
-  setCancelling(true);
-  try {
-    const token = localStorage.getItem("token");
+    setCancelling(true);
+    try {
+      const token = localStorage.getItem("token");
 
-    const res = await fetch(`${API}/bookings/${data._id}/cancel`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ status: "cancelled" }),
-    });
+      const res = await fetch(`${API}/bookings/${data._id}/cancel`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ reason: cancelReason }),
+      });
 
-    const result = await res.json();
+      const result = await res.json();
 
-    if (!res.ok) {
-      throw new Error(result.message);
+      if (!res.ok) {
+        throw new Error(result.message);
+      }
+
+      // ✅ UPDATE UI INSTANTLY
+      setData((prev: any) => ({
+        ...prev,
+        status: "cancelled",
+      }));
+
+      toast.success("Booking cancelled");
+
+      // optional slight delay so user sees update
+      setTimeout(() => {
+        navigate("/farmer/dashboard");
+      }, 500);
+
+    } catch {
+      toast.error("Error cancelling booking");
+    } finally {
+      setCancelling(false);
+      setShowCancel(false);
     }
-
-    // ✅ UPDATE UI INSTANTLY
-    setData((prev: any) => ({
-      ...prev,
-      status: "cancelled",
-    }));
-
-    toast.success("Booking cancelled");
-
-    // optional slight delay so user sees update
-    setTimeout(() => {
-      navigate("/farmer/dashboard");
-    }, 500);
-
-  } catch {
-    toast.error("Error cancelling booking");
-  } finally {
-    setCancelling(false);
-    setShowCancel(false);
-  }
-};
+  };
 
   if (loading) return (
     <div className="min-h-screen bg-[#FDF6E3] flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
         <svg className="animate-spin w-9 h-9 text-[#4A2E15]" viewBox="0 0 24 24" fill="none">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
         </svg>
         <p className="text-[#3A2010] text-base font-medium">Loading booking...</p>
       </div>
@@ -144,10 +214,10 @@ export default function BookingDetails() {
     </div>
   );
 
-  const equipment     = data.equipment;
+  const equipment = data.equipment;
   const bookingStatus = data.status || "pending";
   const paymentStatus = data.paymentStatus || "pending";
-  const canCancel     = !["completed","rejected","cancelled"].includes(bookingStatus);
+  const canCancel = !["completed", "rejected", "cancelled"].includes(bookingStatus);
 
   // ── Rating: pull from equipment (not owner — owner is User model, no rating field) ──
   const equipmentRating = equipment?.rating;
@@ -207,9 +277,9 @@ export default function BookingDetails() {
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <svg className="w-12 h-12 text-[#C9A96E]/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth="1.5"/>
-                        <circle cx="8.5" cy="8.5" r="1.5" strokeWidth="1.5"/>
-                        <path d="M21 15l-5-5L5 21" strokeWidth="1.5"/>
+                        <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth="1.5" />
+                        <circle cx="8.5" cy="8.5" r="1.5" strokeWidth="1.5" />
+                        <path d="M21 15l-5-5L5 21" strokeWidth="1.5" />
                       </svg>
                     </div>
                   )}
@@ -256,9 +326,9 @@ export default function BookingDetails() {
               <div className="grid sm:grid-cols-2 gap-5">
                 {[
                   { icon: Calendar, label: "Service Date", value: data.date },
-                  { icon: Clock,    label: "Time",         value: formatTime(data.startTime) },
-                  { icon: MapPin,   label: "Location",     value: equipment?.location },
-                  { icon: Calendar, label: "Booked On",    value: new Date(data.createdAt).toLocaleDateString("en-IN",{ day:"numeric", month:"short", year:"numeric" }) },
+                  { icon: Clock, label: "Time", value: formatTime(data.startTime) },
+                  { icon: MapPin, label: "Location", value: equipment?.location },
+                  { icon: Calendar, label: "Booked On", value: new Date(data.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) },
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <item.icon className="w-5 h-5 text-[#4A2E15] mt-0.5 flex-shrink-0" />
@@ -270,6 +340,14 @@ export default function BookingDetails() {
                 ))}
               </div>
             </div>
+            {data.status === "cancelled" && (
+              <div className="bg-red-50 border border-red-200 p-4 rounded-xl">
+                <p className="font-semibold text-red-700">Cancellation Reason</p>
+                <p className="text-sm mt-1">
+                  {data.cancelReason || "No reason provided"}
+                </p>
+              </div>
+            )}
 
             {/* Owner — name + rating (from equipment.rating) + Call Owner + divider + Contact Number */}
             <div className="bg-white rounded-2xl border border-[#E0D0BC] shadow-sm p-6">
@@ -310,7 +388,73 @@ export default function BookingDetails() {
               )}
             </div>
 
+            {/* REVIEW SECTION */}
+            {data.status === "completed" && (
+  <div className="bg-white rounded-2xl border p-6">
+
+    <h2 className="text-xl font-bold mb-4">Your Review</h2>
+
+    {/* ✅ IF REVIEW EXISTS */}
+    {review ? (
+      <>
+        {/* Stars */}
+        <div className="flex gap-1 mb-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <span key={i}>
+              {i < review.rating ? "⭐" : "☆"}
+            </span>
+          ))}
+        </div>
+
+        {/* Comment */}
+        <p className="text-sm mb-4">
+          {review.comment || "No comment"}
+        </p>
+
+        {/* Delete */}
+        <button
+          onClick={deleteReview}
+          className="bg-red-500 text-white px-3 py-2 rounded"
+        >
+          Delete Review
+        </button>
+      </>
+    ) : (
+      <>
+        {/* FORM */}
+        <div className="flex gap-2 mb-3">
+          {[1,2,3,4,5].map((star) => (
+            <span
+              key={star}
+              onClick={() => setRating(star)}
+              className="cursor-pointer text-xl"
+            >
+              {star <= rating ? "⭐" : "☆"}
+            </span>
+          ))}
+        </div>
+
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder="Write your review..."
+          className="w-full border p-2 mb-3 rounded"
+        />
+
+        <button
+          onClick={submitReview}
+          className="bg-[#4A2E15] text-white px-4 py-2 rounded"
+        >
+          Submit Review
+        </button>
+      </>
+    )}
+  </div>
+)}
+
           </div>
+
+
 
           {/* ── RIGHT SIDEBAR ── */}
           <div className="space-y-5">
@@ -364,19 +508,18 @@ export default function BookingDetails() {
 
                 {/* Cancel button — always shown when cancellable */}
                 <button
-  onClick={() => canCancel && setShowCancel(true)}
-  disabled={!canCancel}
-  className={`w-full flex items-center justify-center gap-2 font-bold text-sm py-3.5 rounded-xl transition-all
-    ${
-      canCancel
-        ? "bg-red-500 hover:bg-red-600 text-white"
-        : "bg-gray-300 text-gray-500 cursor-not-allowed"
-    }
+                  onClick={() => canCancel && setShowCancel(true)}
+                  disabled={!canCancel}
+                  className={`w-full flex items-center justify-center gap-2 font-bold text-sm py-3.5 rounded-xl transition-all
+    ${canCancel
+                      ? "bg-red-500 hover:bg-red-600 text-white"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }
   `}
->
-  <XCircle className="w-4 h-4" />
-  Cancel Booking
-</button>
+                >
+                  <XCircle className="w-4 h-4" />
+                  Cancel Booking
+                </button>
 
               </div>
             </div>

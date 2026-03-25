@@ -1,0 +1,20 @@
+// src/components/Portal.tsx
+// Renders children directly into document.body so no parent stacking context
+// (backdrop-filter, transform, opacity) can trap the z-index
+
+import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+
+export default function Portal({ children }: { children: React.ReactNode }) {
+  const el = useRef(document.createElement("div"));
+
+  useEffect(() => {
+    const container = el.current;
+    document.body.appendChild(container);
+    return () => {
+      document.body.removeChild(container);
+    };
+  }, []);
+
+  return createPortal(children, el.current);
+}

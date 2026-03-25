@@ -15,6 +15,7 @@ interface IBooking extends mongoose.Document {
   date: string;
   startTime: string;
   duration: number;
+    cancelReason: string;
 
   totalPrice: number;
 
@@ -51,7 +52,10 @@ const bookingSchema = new mongoose.Schema<IBooking>(
       type: Number,
       required: true
     },
-
+    cancelReason: {
+  type: String,
+  default: ""
+},
     totalPrice: {
       type: Number,
       required: true
