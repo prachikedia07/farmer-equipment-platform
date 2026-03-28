@@ -17,13 +17,11 @@ export default function FarmerProfile() {
   const [saving,   setSaving]   = useState(false);
   const [farmerStats, setFarmerStats] = useState({ total: 0, completed: 0, pending: 0 });
 
-  // password change
   const [pwModal,  setPwModal]  = useState(false);
   const [pwForm,   setPwForm]   = useState({ current: "", newPw: "", confirm: "" });
   const [showPw,   setShowPw]   = useState({ current: false, newPw: false, confirm: false });
   const [pwSaving, setPwSaving] = useState(false);
 
-  // delete account
   const [delModal,   setDelModal]   = useState(false);
   const [delConfirm, setDelConfirm] = useState("");
   const [deleting,   setDeleting]   = useState(false);
@@ -38,7 +36,7 @@ export default function FarmerProfile() {
           fetch(`${API}/bookings/my`,  { headers: { Authorization: `Bearer ${token}` } }),
         ]);
         const profile = await profileRes.json();
-        const b = await bRes.json();
+        const b       = await bRes.json();
         setData(profile); setOriginal(profile);
         if (Array.isArray(b)) {
           setFarmerStats({
@@ -65,9 +63,7 @@ export default function FarmerProfile() {
       });
       const resData = await res.json();
       if (!res.ok) throw new Error(resData.message);
-      updateUser(resData);
-      setOriginal(resData);
-      setEditing(false);
+      updateUser(resData); setOriginal(resData); setEditing(false);
       toast.success("Profile updated!");
     } catch { toast.error("Failed to update profile"); }
     finally { setSaving(false); }
@@ -79,7 +75,7 @@ export default function FarmerProfile() {
   const changePassword = async () => {
     if (!pwForm.current || !pwForm.newPw) { toast.error("Please fill all fields"); return; }
     if (pwForm.newPw !== pwForm.confirm)  { toast.error("Passwords don't match"); return; }
-    if (pwForm.newPw.length < 6)          { toast.error("Password must be at least 6 characters"); return; }
+    if (pwForm.newPw.length < 6)          { toast.error("Min 6 characters"); return; }
     setPwSaving(true);
     try {
       const token = localStorage.getItem("token");
@@ -90,10 +86,8 @@ export default function FarmerProfile() {
       });
       const resData = await res.json();
       if (!res.ok) throw new Error(resData.message);
-      toast.success("Password changed successfully!");
-      setPwModal(false);
-      setPwForm({ current: "", newPw: "", confirm: "" });
-    } catch (err: any) { toast.error(err.message || "Failed to change password"); }
+      toast.success("Password changed!"); setPwModal(false); setPwForm({ current: "", newPw: "", confirm: "" });
+    } catch (err: any) { toast.error(err.message || "Failed"); }
     finally { setPwSaving(false); }
   };
 
@@ -103,13 +97,9 @@ export default function FarmerProfile() {
     setDeleting(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API}/auth/account`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(`${API}/auth/account`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error();
-      toast.success("Account deleted");
-      logout();
+      toast.success("Account deleted"); logout();
     } catch { toast.error("Failed to delete account"); }
     finally { setDeleting(false); }
   };
@@ -126,138 +116,153 @@ export default function FarmerProfile() {
   const initials = data?.name?.split(" ").map((n: string) => n[0]).join("").slice(0,2).toUpperCase() || "F";
 
   const inputClass = (disabled: boolean) =>
-    `w-full rounded-xl px-4 py-3 text-sm font-medium outline-none transition
+    `w-full rounded-xl px-4 py-3 text-sm font-medium outline-none transition border
     ${disabled
-      ? "bg-[#F5EDD8] border border-transparent text-[#1A0E05] cursor-default"
-      : "bg-white border border-[#D9CBBA] text-[#1A0E05] focus:border-[#4A2E15] focus:ring-2 focus:ring-[#4A2E15]/10"
+      ? "bg-[#F8F4EE] border-transparent text-[#1A0E05] cursor-default"
+      : "bg-white border-[#D9CBBA] text-[#1A0E05] focus:border-[#4A2E15] focus:ring-2 focus:ring-[#4A2E15]/10"
     }`;
 
   return (
-    <div className="min-h-screen bg-[#FDF6E3] pb-16">
-      <div className="max-w-2xl mx-auto px-4">
+    <div className="min-h-screen bg-[#FDF6E3] py-8 px-4">
+      <div className="max-w-2xl mx-auto space-y-5">
 
-        {/* COVER + AVATAR */}
-        <div className="bg-white rounded-b-3xl shadow-sm border border-[#E0D0BC] border-t-0 overflow-visible mb-6">
-          <div className="h-32 bg-gradient-to-br from-[#4A2E15] via-[#3A2010] to-[#2C1A0E] relative rounded-t-3xl">
-            <div className="absolute inset-0 opacity-10">
-              <svg width="100%" height="100%"><defs><pattern id="dotf" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.5" fill="#E6A817"/></pattern></defs><rect width="100%" height="100%" fill="url(#dotf)"/></svg>
-            </div>
-            <span className="absolute top-4 right-4 bg-[#E6A817]/20 border border-[#E6A817]/40 text-[#E6A817] text-xs font-bold px-3 py-1 rounded-full">
+        {/* ── COVER + AVATAR CARD — full width, matches screenshot ── */}
+        <div className="bg-white rounded-3xl shadow-sm border border-[#E8DCC8] overflow-hidden">
+          {/* Cover band */}
+          <div className="h-36 bg-gradient-to-br from-[#3A2010] via-[#4A2E15] to-[#2C1A0E] relative">
+            {/* Dot pattern */}
+            <svg className="absolute inset-0 w-full h-full opacity-[0.12]" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="dp" x="0" y="0" width="18" height="18" patternUnits="userSpaceOnUse">
+                  <circle cx="3" cy="3" r="1.5" fill="#E6A817"/>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#dp)"/>
+            </svg>
+            {/* Role badge */}
+            <span className="absolute top-4 right-5 text-xs font-bold px-3 py-1.5 rounded-full"
+              style={{ background: "rgba(230,168,23,0.18)", border: "1px solid rgba(230,168,23,0.5)", color: "#E6A817" }}>
               Farmer
             </span>
           </div>
-          <div className="px-6 pb-5">
-            <div className="flex items-end justify-between -mt-8 mb-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#4A2E15] to-[#2C1A0E] flex items-center justify-center shadow-lg border-2 border-white flex-shrink-0">
+
+          {/* Avatar overlapping + info */}
+          <div className="px-6 pb-6">
+            <div className="flex items-start justify-between" style={{ marginTop: "-28px" }}>
+              {/* Avatar */}
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#4A2E15] to-[#2C1A0E] flex items-center justify-center shadow-lg border-[3px] border-white flex-shrink-0">
                 <span className="text-xl font-extrabold text-[#E6A817]">{initials}</span>
               </div>
+              {/* Edit / Save buttons */}
               {!editing ? (
                 <button onClick={() => setEditing(true)}
-                  className="inline-flex items-center gap-1.5 border-2 border-[#E0D0BC] bg-white hover:bg-[#F5EDD8] text-[#2C1A0E] font-bold text-sm px-4 py-2 rounded-xl transition-all">
+                  className="mt-6 inline-flex items-center gap-1.5 border-2 border-[#E0D0BC] bg-white hover:bg-[#F5EDD8] text-[#2C1A0E] font-bold text-sm px-4 py-2 rounded-xl transition-all shadow-sm">
                   <Pencil className="w-4 h-4" /> Edit Profile
                 </button>
               ) : (
-                <div className="flex gap-2">
-                  <button onClick={cancelEdit} className="inline-flex items-center gap-1.5 border-2 border-[#E0D0BC] bg-white text-[#5C3D1E] font-bold text-sm px-3 py-2 rounded-xl hover:bg-[#F5EDD8] transition-all">
+                <div className="mt-6 flex gap-2">
+                  <button onClick={cancelEdit} className="inline-flex items-center gap-1 border-2 border-[#E0D0BC] bg-white text-[#5C3D1E] font-bold text-sm px-3 py-2 rounded-xl hover:bg-[#F5EDD8] transition-all">
                     <X className="w-4 h-4" /> Cancel
                   </button>
                   <button onClick={updateProfile} disabled={saving}
-                    className="inline-flex items-center gap-1.5 bg-[#4A2E15] hover:bg-[#3A2010] disabled:opacity-60 text-white font-bold text-sm px-4 py-2 rounded-xl transition-all shadow-md">
+                    className="inline-flex items-center gap-1 bg-[#4A2E15] hover:bg-[#3A2010] disabled:opacity-60 text-white font-bold text-sm px-4 py-2 rounded-xl transition-all shadow-md">
                     <Save className="w-4 h-4" /> {saving ? "Saving..." : "Save"}
                   </button>
                 </div>
               )}
             </div>
-            <h1 className="text-xl font-extrabold text-[#1A0E05]">{data?.name}</h1>
-            <span className="inline-block mt-1 bg-[#4A2E15] text-white text-xs font-bold px-3 py-1 rounded-full capitalize">{data?.role || "farmer"}</span>
+            <div className="mt-3">
+              <h1 className="text-xl font-extrabold text-[#1A0E05]">{data?.name}</h1>
+              <span className="inline-block mt-1.5 bg-[#4A2E15] text-white text-xs font-bold px-3 py-1 rounded-full">Farmer</span>
+            </div>
           </div>
         </div>
 
-        {/* STATS */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          {[
-            { label: "Total",     value: farmerStats.total,     color: "from-[#FDF6E3] to-[#F5EDD8]", border: "border-[#E0D0BC]",  text: "text-[#4A2E15]"  },
-            { label: "Completed", value: farmerStats.completed, color: "from-green-50 to-emerald-50", border: "border-green-100",  text: "text-green-700"  },
-            { label: "Pending",   value: farmerStats.pending,   color: "from-amber-50 to-yellow-50",  border: "border-amber-100",  text: "text-amber-700"  },
-          ].map((s, i) => (
-            <div key={i} className={`bg-gradient-to-br ${s.color} border ${s.border} rounded-2xl p-4 text-center`}>
-              <p className={`text-lg font-extrabold ${s.text}`}>{s.value}</p>
-              <p className="text-xs font-semibold text-[#5C3D1E]/65 mt-0.5">{s.label}</p>
-            </div>
-          ))}
+        {/* ── STATS — 3 cols with subtle colors matching screenshot ── */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-white rounded-2xl border border-[#E8DCC8] p-5 text-center shadow-sm">
+            <p className="text-2xl font-extrabold text-[#4A2E15]">{farmerStats.total}</p>
+            <p className="text-sm text-[#5C3D1E]/65 font-medium mt-0.5">Total</p>
+          </div>
+          <div className="rounded-2xl border border-green-100 p-5 text-center shadow-sm" style={{ background: "linear-gradient(135deg,#f0fdf4,#dcfce7)" }}>
+            <p className="text-2xl font-extrabold text-green-700">{farmerStats.completed}</p>
+            <p className="text-sm text-green-600/75 font-medium mt-0.5">Completed</p>
+          </div>
+          <div className="rounded-2xl border border-amber-100 p-5 text-center shadow-sm" style={{ background: "linear-gradient(135deg,#fffbeb,#fef3c7)" }}>
+            <p className="text-2xl font-extrabold text-amber-600">{farmerStats.pending}</p>
+            <p className="text-sm text-amber-600/75 font-medium mt-0.5">Pending</p>
+          </div>
         </div>
 
-        {/* PERSONAL INFORMATION */}
-        <div className="bg-white rounded-2xl border border-[#E0D0BC] shadow-sm p-6 mb-5">
+        {/* ── PERSONAL INFORMATION ── */}
+        <div className="bg-white rounded-2xl border border-[#E8DCC8] shadow-sm p-6">
           <h2 className="text-lg font-extrabold text-[#1A0E05] mb-5 flex items-center gap-2">
             <User className="w-5 h-5 text-[#4A2E15]" /> Personal Information
           </h2>
           <div className="space-y-4">
             {[
-              { icon: User,  label: "Full Name",     key: "name",     placeholder: "Your full name"          },
-              { icon: Phone, label: "Phone Number",  key: "phone",    placeholder: "+91 9876543210"          },
-              { icon: Mail,  label: "Email Address", key: "email",    placeholder: "you@example.com"         },
-              { icon: MapPin,label: "Location",      key: "location", placeholder: "Village Rampur, Punjab"  },
+              { icon: User,   label: "Full Name",     key: "name",     placeholder: "Your full name"         },
+              { icon: Phone,  label: "Phone Number",  key: "phone",    placeholder: "+91 9876543210"         },
+              { icon: Mail,   label: "Email Address", key: "email",    placeholder: "you@example.com"        },
+              { icon: MapPin, label: "Location",      key: "location", placeholder: "Village Rampur, Punjab" },
             ].map(f => (
               <div key={f.key}>
-                <label className="flex items-center gap-1.5 text-sm font-bold text-[#1A0E05] mb-1.5">
-                  <f.icon className="w-4 h-4 text-[#4A2E15]/60" /> {f.label}
-                  {f.key === "location" && <span className="text-xs font-normal text-[#5C3D1E]/50">(optional)</span>}
+                <label className="flex items-center gap-1.5 text-sm font-bold text-[#3A2010] mb-1.5">
+                  <f.icon className="w-4 h-4 text-[#4A2E15]/55" /> {f.label}
+                  {f.key === "location" && <span className="text-xs font-normal text-[#5C3D1E]/45 ml-1">(optional)</span>}
                 </label>
-                {editing ? (
-                  <input value={data?.[f.key] || ""} onChange={e => setData({...data, [f.key]: e.target.value})}
-                    placeholder={f.placeholder} className={inputClass(false)} />
-                ) : (
-                  <p className={inputClass(true)}>{data?.[f.key] || <span className="text-[#5C3D1E]/40">{f.placeholder}</span>}</p>
-                )}
+                {editing
+                  ? <input value={data?.[f.key] || ""} onChange={e => setData({...data, [f.key]: e.target.value})} placeholder={f.placeholder} className={inputClass(false)} />
+                  : <div className={inputClass(true)}>{data?.[f.key] || <span className="text-[#5C3D1E]/35">{f.placeholder}</span>}</div>
+                }
               </div>
             ))}
           </div>
         </div>
 
-        {/* SECURITY */}
-        <div className="bg-white rounded-2xl border border-[#E0D0BC] shadow-sm p-6 mb-5">
+        {/* ── SECURITY ── */}
+        <div className="bg-white rounded-2xl border border-[#E8DCC8] shadow-sm p-6">
           <h2 className="text-lg font-extrabold text-[#1A0E05] mb-4 flex items-center gap-2">
             <ShieldAlert className="w-5 h-5 text-[#4A2E15]" /> Security
           </h2>
           <div className="space-y-3">
             <button onClick={() => setPwModal(true)}
-              className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl border-2 border-[#E0D0BC] hover:bg-[#FDF6E3] transition-all group">
+              className="w-full flex items-center justify-between px-4 py-4 rounded-xl border-2 border-[#E8DCC8] hover:bg-[#FDF6E3] transition-all group">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center">
-                  <ShieldAlert className="w-4 h-4 text-blue-600" />
+                <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center flex-shrink-0">
+                  <ShieldAlert className="w-4 h-4 text-blue-500" />
                 </div>
                 <div className="text-left">
                   <p className="text-sm font-bold text-[#1A0E05]">Change Password</p>
-                  <p className="text-xs text-[#5C3D1E]/55">Update your account password</p>
+                  <p className="text-xs text-[#5C3D1E]/55 mt-0.5">Update your account password</p>
                 </div>
               </div>
-              <span className="text-sm font-semibold text-[#4A2E15] group-hover:underline">Update →</span>
+              <span className="text-sm font-bold text-[#4A2E15]">→</span>
             </button>
             <button onClick={() => setDelModal(true)}
-              className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl border-2 border-red-100 hover:bg-red-50 transition-all group">
+              className="w-full flex items-center justify-between px-4 py-4 rounded-xl border-2 border-red-100 hover:bg-red-50 transition-all group">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
                   <Trash2 className="w-4 h-4 text-red-500" />
                 </div>
                 <div className="text-left">
                   <p className="text-sm font-bold text-red-600">Delete Account</p>
-                  <p className="text-xs text-red-400">Permanently remove your account</p>
+                  <p className="text-xs text-red-400/80 mt-0.5">Permanently remove your account</p>
                 </div>
               </div>
-              <span className="text-sm font-semibold text-red-500 group-hover:underline">Delete →</span>
+              <span className="text-sm font-bold text-red-500">→</span>
             </button>
           </div>
         </div>
 
-        {/* QUICK ACTIONS */}
+        {/* ── QUICK ACTIONS ── */}
         <div className="grid grid-cols-2 gap-3">
-          <a href="/equipment" className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-[#E0D0BC] bg-white hover:border-[#4A2E15]/30 hover:bg-[#FDF6E3] transition-all text-center group">
-            <Tractor className="w-7 h-7 text-[#4A2E15]/40 group-hover:text-[#4A2E15] transition-colors" />
+          <a href="/equipment" className="flex flex-col items-center gap-2 p-5 rounded-2xl border-2 border-[#E8DCC8] bg-white hover:bg-[#FDF6E3] hover:border-[#C9A96E] transition-all text-center group">
+            <Tractor className="w-7 h-7 text-[#4A2E15]/35 group-hover:text-[#4A2E15] transition-colors" />
             <span className="text-sm font-bold text-[#2C1A0E]">Browse Equipment</span>
           </a>
-          <a href="/farmer/dashboard" className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-[#E0D0BC] bg-white hover:border-[#4A2E15]/30 hover:bg-[#FDF6E3] transition-all text-center group">
-            <Calendar className="w-7 h-7 text-[#4A2E15]/40 group-hover:text-[#4A2E15] transition-colors" />
+          <a href="/farmer/dashboard" className="flex flex-col items-center gap-2 p-5 rounded-2xl border-2 border-[#E8DCC8] bg-white hover:bg-[#FDF6E3] hover:border-[#C9A96E] transition-all text-center group">
+            <Calendar className="w-7 h-7 text-[#4A2E15]/35 group-hover:text-[#4A2E15] transition-colors" />
             <span className="text-sm font-bold text-[#2C1A0E]">My Bookings</span>
           </a>
         </div>
@@ -272,8 +277,8 @@ export default function FarmerProfile() {
             <div className="bg-[#FDF6E3] rounded-2xl w-full max-w-md shadow-2xl p-7">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-xl font-extrabold text-[#1A0E05]">Change Password</h2>
-                <button onClick={() => setPwModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#E5D5B5] transition text-[#5C3D1E]">
-                  <X className="w-5 h-5" />
+                <button onClick={() => setPwModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#E5D5B5] transition">
+                  <X className="w-5 h-5 text-[#5C3D1E]" />
                 </button>
               </div>
               <div className="space-y-4">
@@ -313,24 +318,21 @@ export default function FarmerProfile() {
             <div className="bg-[#FDF6E3] rounded-2xl w-full max-w-md shadow-2xl p-7">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-extrabold text-red-700">Delete Account</h2>
-                <button onClick={() => setDelModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#E5D5B5] transition text-[#5C3D1E]">
-                  <X className="w-5 h-5" />
+                <button onClick={() => setDelModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#E5D5B5] transition">
+                  <X className="w-5 h-5 text-[#5C3D1E]" />
                 </button>
               </div>
               <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-5">
                 <p className="text-sm font-bold text-red-700 mb-1">⚠️ This action is permanent</p>
-                <p className="text-sm text-red-600">All your bookings and account data will be permanently deleted. This cannot be undone.</p>
+                <p className="text-sm text-red-600/80">All your bookings and account data will be deleted. This cannot be undone.</p>
               </div>
               <label className="block text-sm font-bold text-[#1A0E05] mb-2">
-                Type <span className="font-extrabold text-red-600">DELETE</span> to confirm
+                Type <span className="text-red-600 font-extrabold">DELETE</span> to confirm
               </label>
-              <input value={delConfirm} onChange={e => setDelConfirm(e.target.value)}
-                placeholder="DELETE"
+              <input value={delConfirm} onChange={e => setDelConfirm(e.target.value)} placeholder="DELETE"
                 className="w-full bg-white border-2 border-red-200 focus:border-red-400 rounded-xl px-4 py-3 text-sm text-[#1A0E05] outline-none transition mb-4" />
               <div className="flex gap-3">
-                <button onClick={() => setDelModal(false)} className="flex-1 border-2 border-[#D9CBBA] bg-white hover:bg-[#F5EDD8] text-[#1A0E05] font-bold py-3 rounded-xl transition-all">
-                  Cancel
-                </button>
+                <button onClick={() => setDelModal(false)} className="flex-1 border-2 border-[#D9CBBA] bg-white hover:bg-[#F5EDD8] text-[#1A0E05] font-bold py-3 rounded-xl transition-all">Cancel</button>
                 <button onClick={deleteAccount} disabled={deleting || delConfirm !== "DELETE"}
                   className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition-all">
                   {deleting ? "Deleting..." : "Delete Account"}

@@ -10,7 +10,7 @@ const API = "http://localhost:5000/api";
 const ROLES = [
   { value: "farmer", label: "Farmer"         },
   { value: "owner",  label: "Equipment Owner" },
-  { value: "admin",  label: "Admin"           },
+  // { value: "admin",  label: "Admin"           },
 ];
 
 export default function Signup() {

@@ -7,6 +7,13 @@ export const registerUser = async (req: Request, res: Response) => {
   try {
     const { name, phone, email, password, role } = req.body;
 
+    // ❌ BLOCK ADMIN CREATION
+if (role === "admin") {
+  return res.status(403).json({
+    message: "Admin accounts cannot be created from signup"
+  });
+}
+
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
@@ -35,7 +42,7 @@ export const registerUser = async (req: Request, res: Response) => {
 
 export const loginUser = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
     const user = await User.findOne({ email });
 
@@ -48,6 +55,12 @@ export const loginUser = async (req: Request, res: Response) => {
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
+
+    if (user.role !== role) {
+  return res.status(403).json({
+    message: "Access denied for this role"
+  });
+}
 
    const token = jwt.sign(
   { id: user._id, role: user.role },

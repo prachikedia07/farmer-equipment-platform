@@ -39,7 +39,10 @@ export default function Login() {
   const res = await fetch(`${API}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(form),
+    body: JSON.stringify({
+      ...form,
+      role   // 🔥 VERY IMPORTANT FIX
+    }),
   });
 
   const data = await res.json();
@@ -55,9 +58,15 @@ export default function Login() {
     } else {
       navigate("/admin/dashboard");
     }
+
     toast.success("Login successful!");
   } else {
-    toast.error(data.message || "Login failed");
+    // 🔥 IMPROVED ERROR
+    if (data.message?.includes("Access denied")) {
+      toast.error("Wrong role selected for this account");
+    } else {
+      toast.error(data.message || "Login failed");
+    }
   }
 };
 
