@@ -5,7 +5,7 @@ import { X, ChevronDown } from "lucide-react";
 import toast from "react-hot-toast";
 import Portal from "./Portal";
 
-const API = "http://localhost:5000/api";
+const API = import.meta.env.VITE_API_URL;
 const CATEGORIES = ["tractor","rotavator","cultivator","seed_drill","trolley","harvester","sprayer","thresher"];
 const fmt = (c: string) => c.split("_").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 const inputCls = "w-full bg-white border border-[#D9CBBA] rounded-xl px-4 py-3 text-sm text-[#1A0E05] placeholder-[#5C3D1E]/40 outline-none focus:border-[#4A2E15] focus:ring-2 focus:ring-[#4A2E15]/10 transition";

@@ -9,7 +9,7 @@ import {
 import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 
-const API = "http://localhost:5000/api";
+const API = import.meta.env.VITE_API_URL;
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800 border border-yellow-300",
@@ -55,7 +55,7 @@ export default function BookingDetails() {
   const [cancelReason, setCancelReason] = useState("");
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-  const [reviewed, setReviewed] = useState(false);
+  // const [reviewed, setReviewed] = useState(false);
   const [review, setReview] = useState<any>(null);
 
   useEffect(() => {

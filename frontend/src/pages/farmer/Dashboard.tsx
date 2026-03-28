@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Calendar, Clock, Star, Tractor, MapPin } from "lucide-react";
 
-const API = "http://localhost:5000/api";
+const API = import.meta.env.VITE_API_URL;
 
 const STATUS_STYLES: Record<string, string> = {
   pending:   "bg-yellow-100 text-yellow-800 border border-yellow-300",
@@ -40,7 +40,7 @@ function formatTime(t: string): string {
 
 export default function FarmerDashboard() {
   const { user }   = useAuth();
-  const navigate   = useNavigate();
+  // const navigate   = useNavigate();
   const [bookings, setBookings] = useState<any[]>([]);
   const [filter, setFilter]     = useState("all");
 

@@ -1,7 +1,7 @@
 // src/pages/admin/AdminDashboard.tsx
 
 import { useEffect, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+// import { useAuth } from "../../context/AuthContext";
 import toast from "react-hot-toast";
 import {
   Users, Tractor, Calendar, IndianRupee, TrendingUp, MapPin
@@ -11,7 +11,7 @@ import {
   ResponsiveContainer, PieChart, Pie, Cell
 } from "recharts";
 
-const API = "http://localhost:5000/api";
+const API = import.meta.env.VITE_API_URL;
 
 const STATUS_STYLES: Record<string, string> = {
   pending:   "bg-yellow-100 text-yellow-700",
@@ -25,7 +25,7 @@ const STATUS_STYLES: Record<string, string> = {
 const CHART_COLORS = ["#6D4C41", "#8D6E63", "#689F38", "#D4A574", "#FFA726"];
 
 export default function AdminDashboard() {
-  const { user } = useAuth();
+  // const { user } = useAuth();
   const [data,    setData]    = useState<any>(null);
   const [loading, setLoading] = useState(true);
 

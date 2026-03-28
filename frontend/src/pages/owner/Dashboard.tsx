@@ -10,7 +10,7 @@ import {
 import EquipmentModal from "../../components/EquipmentModal";
 import toast from "react-hot-toast";
 
-const API = "http://localhost:5000/api";
+const API = import.meta.env.VITE_API_URL;
 
 // All filter first, then status filters including cancelled
 const BOOKING_FILTERS = ["All", "Pending", "Confirmed", "Completed", "Rejected", "Cancelled"] as const;

@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Tractor, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 
-const API = "http://localhost:5000/api";
+const API = import.meta.env.VITE_API_URL;
 
 const ROLES = [
   { value: "farmer", label: "Farmer"         },

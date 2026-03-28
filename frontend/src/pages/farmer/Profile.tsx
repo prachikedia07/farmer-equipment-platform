@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 import Portal from "../../components/Portal";
 
-const API = "http://localhost:5000/api";
+const API = import.meta.env.VITE_API_URL;
 
 export default function FarmerProfile() {
   const { updateUser, logout } = useAuth();

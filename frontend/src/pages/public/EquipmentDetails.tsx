@@ -7,7 +7,7 @@ import BookingModal from "../../components/BookingModal";
 import { useAuth } from "../../context/AuthContext";
 import toast from "react-hot-toast";
 
-const API = "http://localhost:5000/api";
+const API = import.meta.env.VITE_API_URL;
 
 
 

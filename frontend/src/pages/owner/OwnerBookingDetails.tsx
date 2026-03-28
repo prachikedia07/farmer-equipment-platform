@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 import Portal from "../../components/Portal";
 
-const API = "http://localhost:5000/api";
+const API = import.meta.env.VITE_API_URL;
 
 const STATUS_STYLES: Record<string, string> = {
   pending:   "bg-yellow-100 text-yellow-800 border border-yellow-300",
